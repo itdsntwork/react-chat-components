@@ -18,7 +18,7 @@
     "typescript": "^4.1.3"
   },
   "dependencies": {
-    "@pubnub/react-chat-components": "^0.2.0",
+    "@pubnub/react-chat-components": "file:../lib/dist",
     "@types/emoji-mart": "^3.0.4",
     "emoji-mart": "^3.0.0",
     "lodash.samplesize": "^4.2.0",
@@ -33,7 +33,7 @@
     "web-vitals": "^0.2.4"
   },
   "scripts": {
-    "start": "react-app-rewired start",
+    "start": "cd ../lib && npm run build && cd ../samples && react-app-rewired start",
     "build": "react-app-rewired build",
     "test": "react-app-rewired test",
     "eject": "react-scripts eject"
