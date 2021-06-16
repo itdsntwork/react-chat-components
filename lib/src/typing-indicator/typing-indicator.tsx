@@ -8,6 +8,7 @@ import {
 } from "../state-atoms";
 import isEqual from "lodash.isequal";
 import "./typing-indicator.scss";
+import { usePubNub } from "pubnub-react";
 
 export interface TypingIndicatorProps {
   /** Put a TypingIndicator with this option enabled inside of a MessageList component to render indicators as Messages. */
@@ -19,12 +20,14 @@ export interface TypingIndicatorProps {
  * a Message that can be renderer inside of the MessageList.
  */
 export const TypingIndicator: FC<TypingIndicatorProps> = (props: TypingIndicatorProps) => {
+  const pubnub = usePubNub();
   const [theme] = useAtom(ThemeAtom);
   const [users] = useAtom(UsersMetaAtom);
   const [typingIndicators] = useAtom(CurrentChannelTypingIndicatorAtom);
   const [typingIndicatorTimeout] = useAtom(TypingIndicatorTimeoutAtom);
   const [activeUUIDs, setActiveUUIDs] = useState([]);
   const typingIndicatorsRef = useRef(typingIndicators);
+  const currentUuid = pubnub.getUUID();
 
   if (!isEqual(typingIndicatorsRef.current, typingIndicators)) {
     typingIndicatorsRef.current = typingIndicators;
@@ -32,10 +35,12 @@ export const TypingIndicator: FC<TypingIndicatorProps> = (props: TypingIndicator
 
   const calculateActiveUUIDs = useCallback(() => {
     const currentActiveUUIDs = Object.keys(typingIndicators).filter(
-      (id) => Date.now() - parseInt(typingIndicators[id]) / 10000 < typingIndicatorTimeout * 1000
+      (id) =>
+        Date.now() - parseInt(typingIndicators[id]) / 10000 < typingIndicatorTimeout * 1000 ||
+        id === currentUuid
     );
     setActiveUUIDs(currentActiveUUIDs);
-  }, [typingIndicatorsRef.current]);
+  }, [currentUuid, typingIndicatorTimeout, typingIndicators]);
 
   const getIndicationString = () => {
     let indicateStr = "";
